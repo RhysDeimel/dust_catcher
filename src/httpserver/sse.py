@@ -28,17 +28,19 @@ from .response import HTTPResponse
 
 
 class EventSource:
-    """ Open and use an event stream connection to the client """
+    """Open and use an event stream connection to the client"""
 
     def __init__(self, conn):
-        """ Set up an event stream connection """
+        """Set up an event stream connection"""
         self.conn = conn
 
-        response = HTTPResponse(200, "text/event-stream", close=False, header={"Cache-Control": "no-cache"})
+        response = HTTPResponse(
+            200, "text/event-stream", close=False, header={"Cache-Control": "no-cache"}
+        )
         response.send(self.conn)
 
     def send(self, data=":", id=None, event=None, retry=None):
-        """ Send event to client following the event stream format
+        """Send event to client following the event stream format
         :param str data: event data to send to client. mandatory
         :param int id: optional event id
         :param str event: optional event type, used for dispatching at client

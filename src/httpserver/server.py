@@ -46,16 +46,17 @@ class HTTPServerError(Exception):
 
 
 class HTTPServer:
-
     def __init__(self, host="0.0.0.0", port=80, backlog=5, timeout=30):
         self.host = host
         self.port = port
         self.backlog = backlog
         self.timeout = timeout
-        self._routes = dict()  # stores link between (method, path) and function to execute
+        self._routes = (
+            dict()
+        )  # stores link between (method, path) and function to execute
 
     def route(self, method="GET", path="/"):
-        """ Decorator which connects method and path to the decorated function. """
+        """Decorator which connects method and path to the decorated function."""
 
         if (method, path) in self._routes:
             raise HTTPServerError(f"route{(method, path)} already registered")
@@ -116,8 +117,12 @@ class HTTPServer:
                         break
                     else:
                         if line.find(b":") != 1:
-                            name, value = line.split(b':', 1)
+                            name, value = line.split(b":", 1)
                             request.header[name] = value.strip()
+
+                if request.header.get(b"Content-Length"):
+                    length = int(str(request.header[b"Content-Length"], "utf-8"))
+                    request.body = conn.recv(length)
 
                 # search function which is connected to (method, path)
                 func = self._routes.get((request.method, request.path))
@@ -135,9 +140,13 @@ class HTTPServer:
                 break
             except Exception as e:
                 conn.close()
-                if type(e) is OSError and e.errno == errno.ETIMEDOUT:  # communication timeout
+                if (
+                    type(e) is OSError and e.errno == errno.ETIMEDOUT
+                ):  # communication timeout
                     pass
-                elif type(e) is OSError and e.errno == errno.ECONNRESET:  # client reset the connection
+                elif (
+                    type(e) is OSError and e.errno == errno.ECONNRESET
+                ):  # client reset the connection
                     pass
                 else:
                     server.close()

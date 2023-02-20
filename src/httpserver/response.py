@@ -30,17 +30,12 @@ class MimeType:
     APPLICATION_JSON = b"Content-Type: application/json\r\n"
 
 
-reason = {
-    200: "OK",
-    400: "Bad Request",
-    404: "Not Found"
-}
+reason = {200: "OK", 400: "Bad Request", 404: "Not Found"}
 
 
 class HTTPResponse:
-
     def __init__(self, status, mimetype=None, close=True, header=None):
-        """ Create a response object
+        """Create a response object
         :param int status: HTTP status code
         :param str mimetype: HTTP mime type
         :param bool close: if true close connection else keep alive
@@ -55,7 +50,7 @@ class HTTPResponse:
             self.header = header
 
     def send(self, writer):
-        """ Send response to stream writer """
+        """Send response to stream writer"""
         writer.write(f"HTTP/1.1 {self.status} {reason.get(self.status, 'NA')}\n")
         if self.mimetype is not None:
             writer.write(f"Content-Type: {self.mimetype}\n")

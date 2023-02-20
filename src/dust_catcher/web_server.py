@@ -1,32 +1,30 @@
-import socket
+import json
+from httpserver import HTTPServer, HTTPResponse
+import fan
+
+app = HTTPServer()
 
 
-def server():
-    # Open socket
-    addr = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
+@app.route("GET", "/")
+def root(conn, request):
+    response = HTTPResponse(200, "application/json", close=True)
+    response.send(conn)
 
-    s = socket.socket()
-    s.bind(addr)
-    s.listen(1)
+    data = {
+        "temperature": None,
+        "humidity": None,
+        "fan_speed": fan.PWMFan().speed,  # the duty cycle (between 0 and 100)
+    }
 
-    print("listening on", addr)
+    conn.write(json.dumps(data))
 
-    # Listen for connections
-    while True:
-        try:
-            cl, addr = s.accept()
-            print("client connected from", addr)
-            cl_file = cl.makefile("rwb", 0)
-            while True:
-                line = cl_file.readline()
-                print(line)
-                if not line or line == b"\r\n":
-                    break
-            response = "<h1>Hi</h1>"
-            cl.send("HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n")
-            cl.send(response)
-            cl.close()
 
-        except OSError as e:
-            cl.close()
-            print("connection closed")
+@app.route("PUT", "/")
+def update(conn, request):
+    data = request.body.decode("utf-8")
+    data = json.loads(data)
+
+    fan.PWMFan().speed = data["fan_speed"]
+
+    response = HTTPResponse(204, close=True)
+    response.send(conn)

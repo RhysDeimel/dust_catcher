@@ -8,7 +8,7 @@ _bmview = memoryview(_buffer)  # reuse pre-allocated _buffer
 
 
 def sendfile(conn, filename):
-    """ Send a file to a connection in chunks - lowering memory usage.
+    """Send a file to a connection in chunks - lowering memory usage.
     :param socket conn: connection to send the file content to
     :param str filename: name of file the send
     """

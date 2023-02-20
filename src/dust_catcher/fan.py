@@ -1,5 +1,23 @@
+from machine import Pin, PWM
+
+FAN_PIN = PWM(Pin(16))  # GP16
+FAN_PIN.freq(25000)  # 25kHz
+
+
+def singleton(class_):
+    instances = {}
+
+    def getinstance(*args, **kwargs):
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+        return instances[class_]
+
+    return getinstance
+
+
+@singleton
 class PWMFan:
-    def __init__(self, pin):
+    def __init__(self, pin=FAN_PIN):
         self.pin = pin
         self._speed = 0
 
